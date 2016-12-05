@@ -20,10 +20,10 @@ task main()
 	while(true){
 		int rotateSpeed = 0;
 		if (vexRT[Btn5D] == 1) {
-			rotateSpeed = -25;
+			rotateSpeed = -64;
 		}
 		else if (vexRT[Btn5U] == 1) {
-			rotateSpeed = 25;
+			rotateSpeed = 64;
 		}
 
 		motor[leftFront] 	=   vexRT[Ch1] + vexRT[Ch2] + rotateSpeed;
@@ -33,7 +33,7 @@ task main()
 
 		//lift motors
 		if (vexRT[Btn6D] == 1 || vexRT[Btn6DXmtr2] == 1) {
-			setLiftMotor(128);
+			setLiftMotor(64);
 		}
 		else if (vexRT[Btn6U] == 1 || vexRT[Btn6UXmtr2] == 1) {
 			setLiftMotor(-128);
