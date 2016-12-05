@@ -31,11 +31,19 @@ task main()
 		motor[rightFront] = - vexRT[Ch2] + vexRT[Ch1] + rotateSpeed;
 		motor[leftBack] 	=   vexRT[Ch2] - vexRT[Ch1] + rotateSpeed;
 
+		if (vexRT[Btn5DXmtr2 == 1) {
+			setLiftMotor(16);
+		} else if (vexRT[Btn5UXmtr2 == 1) {
+			setLiftMotor(-32);
+		}
+
 		//lift motors
 		if (vexRT[Btn6D] == 1 || vexRT[Btn6DXmtr2] == 1) {
-			setLiftMotor(64);
+			//move arm down
+			setLiftMotor(32);
 		}
 		else if (vexRT[Btn6U] == 1 || vexRT[Btn6UXmtr2] == 1) {
+			//move arm up
 			setLiftMotor(-128);
 		}
 		else {
