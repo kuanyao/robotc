@@ -74,7 +74,7 @@ void stop_bot_arm() {
 }
 
 void stop_bot_movement() {
-	
+	drive_bot(0, 0);
 }
 
 void rotate_bot_counter_clockwise(speed) {
@@ -133,45 +133,68 @@ void pre_auton()
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+int max(int a, int b) {
+	if (a > b) {
+		return a;
+	} else {
+		return b;
+	}
+}
+
 void push_stars_from_high_fence() {
+	int timeToMoveForward = 5000;
+	int timeToOpenClaw = 2000;
+	int timeToLiftArm = 3000;
+	int syncCount = 0;
+
 	drive_bot_forward();
 	open_bot_claw();
 	lift_bot_arm();
 
+	int maxCount = max(max(timeToLiftArm, timeToMoveForward), timeToOpenClaw);
 
+	while (syncCount < maxCount) {
+		wait(10);
+		syncCount += 10;
+		if (syncCount > timeToOpenClaw) {
+			stop_bot_claw();
+		}
+		if (syncCount > timeToLiftArm) {
+			stop_bot_arm();
+		}
+		if (syncCount > timeToMoveForward) {
+			stop_bot_movement();
+		}
+	}
 
+	wait(1000);
+
+	//move bot back
+	int timeToMoveBackward = timeToMoveForward / 2;
+	int timeToDropArm = timeToLiftArm;
+	maxCount = max(timeToMoveBackward, timeToDropArm);
+	syncCount = 0;
+
+	drive_bot_backward();
+	drop_bot_arm();
+
+	while (syncCount < maxCount) {
+		wait(10);
+		syncCount += 10;
+		if (syncCount > timeToDropArm) {
+			stop_bot_arm();
+		}
+		if (syncCount > timeToMoveBackward) {
+			stop_bot_movement();
+		}
+	}
+	
 }
 
 
 task autonomous()
 {
-	//Move bot forward, 
-	move_bot_foward();
-	//Lift arm
-	lift_bot_arm();
-	//Open Claw
-	open_bot_claw();
 
-	//wait # of seconds
-	stop_bot_claw();
-	//wait # of seconds
-	stop_bot_arm();
-	//wait # of seconds
-	stop_bot_wheel();
-
-	//wait for 1 second
-
-	//move bot backwards
-	move_bot_backward();
-	drop_bot_arm();
-
-	//wait # of seconds until bot in position
-	close_bot_claw();
-	//wait until claw closed
-
-	//rotate and move bot into drop position
-	move_bot();
-	open_claw();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
