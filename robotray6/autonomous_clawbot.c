@@ -28,8 +28,26 @@
 
 int clawMotorSpeed = 50;
 int rotateMotorSpeed = 50;
-int liftMotorSpeed = 50;
+int liftMotorSpeed = 80;
 int wheelMotorSpeed = 50;
+
+int trigger_autonumous_mode() {
+	if (vexRT[Btn6D] == 1 && vexRT[Btn6U] == 1) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+int cancel_autonumous_mode() {
+	if (vexRT[Btn6D] == 1 && vexRT[Btn6U] == 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
 
 void sendToLiftMotor(int speed) {
 		motor[liftMotor1] = speed;
@@ -39,18 +57,19 @@ void sendToLiftMotor(int speed) {
 }
 
 void sendToClawMotor(int speed) {
-	motor[clawLeft] = speed;
-	motor[clawRight] = -speed;
+	motor[clawLeft] = -speed;
+	motor[clawRight] = speed;
 }
 
-void rotate_bot() {
-	motor[leftFront]  = speed; 
-	motor[rightBack]  = speed; 
+void rotate_bot(int speed) {
+	motor[leftFront]  = speed;
+	motor[rightBack]  = speed;
 	motor[rightFront] = speed;
 	motor[leftBack]   = speed;
 }
 
-void drive_bot(int speedVeritical, int speedHorizontal) {
+void drive_bot(int speedVeritical, int speedHorizontal ) {
+	speedHorizontal -= 5;
 	motor[leftFront]  = speedVeritical + speedHorizontal;
 	motor[rightBack]  = -1 * (speedVeritical + speedHorizontal);
 	motor[rightFront] = speedHorizontal - speedVeritical;
@@ -77,15 +96,19 @@ void stop_bot_movement() {
 	drive_bot(0, 0);
 }
 
-void rotate_bot_counter_clockwise(speed) {
-	rotate_bot_clockwise(-1 * speed);
+void rotate_bot_clockwise() {
+	rotate_bot(rotateMotorSpeed);
 }
 
-void drive_bot_forward(int speed) {
+void rotate_bot_counter_clockwise() {
+	rotate_bot(-1 * rotateMotorSpeed);
+}
+
+void drive_bot_forward() {
 	drive_bot(wheelMotorSpeed, 0);
 }
 
-void drive_bot_backward(int speed) {
+void drive_bot_backward() {
 	drive_bot(-1 * wheelMotorSpeed, 0);
 }
 
@@ -133,7 +156,7 @@ void pre_auton()
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-int max(int a, int b) {
+long max(long a, long b) {
 	if (a > b) {
 		return a;
 	} else {
@@ -142,32 +165,39 @@ int max(int a, int b) {
 }
 
 void push_stars_from_high_fence() {
-	int timeToMoveForward = 5000;
-	int timeToOpenClaw = 2000;
-	int timeToLiftArm = 3000;
+	int timeToMoveForward = 4500;
+	int timeToOpenClaw = 1500;
+	int timeToLiftArm = 4600;
 	int syncCount = 0;
 
 	drive_bot_forward();
 	open_bot_claw();
 	lift_bot_arm();
 
-	int maxCount = max(max(timeToLiftArm, timeToMoveForward), timeToOpenClaw);
+	long maxCount = max(timeToLiftArm, timeToMoveForward);
+	maxCount = max(maxCount, timeToOpenClaw);
 
-	while (syncCount < maxCount) {
-		wait(10);
+	while (syncCount <= maxCount) {
+		if (cancel_autonumous_mode()) {
+			stop_bot_claw();
+			stop_bot_movement();
+			stop_bot_arm();
+			return;
+		}
+		wait1Msec(10);
 		syncCount += 10;
-		if (syncCount > timeToOpenClaw) {
+		if (syncCount >= timeToOpenClaw) {
 			stop_bot_claw();
 		}
-		if (syncCount > timeToLiftArm) {
+		if (syncCount >= timeToLiftArm) {
 			stop_bot_arm();
 		}
-		if (syncCount > timeToMoveForward) {
+		if (syncCount >= timeToMoveForward) {
 			stop_bot_movement();
 		}
 	}
-
-	wait(1000);
+/*
+	wait1Msec(2000);
 
 	//move bot back
 	int timeToMoveBackward = timeToMoveForward / 2;
@@ -177,24 +207,34 @@ void push_stars_from_high_fence() {
 
 	drive_bot_backward();
 	drop_bot_arm();
+	close_bot_claw();
 
-	while (syncCount < maxCount) {
-		wait(10);
+	while (syncCount <= maxCount) {
+		if (cancel_autonumous_mode()) {
+			stop_bot_arm();
+			stop_bot_claw();
+			stop_bot_movement();
+			return;
+		}
+		wait1Msec(10);
 		syncCount += 10;
-		if (syncCount > timeToDropArm) {
+		if (syncCount >= timeToDropArm) {
 			stop_bot_arm();
 		}
-		if (syncCount > timeToMoveBackward) {
+		if (syncCount >= timeToMoveBackward) {
 			stop_bot_movement();
 		}
+		if (syncCount >= timeToOpenClaw) {
+			stop_bot_claw();
+		}
 	}
-	
+*/
 }
 
 
 task autonomous()
 {
-
+	push_stars_from_high_fence();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -209,6 +249,10 @@ task autonomous()
 task usercontrol()
 {
 	while(true){
+		if (trigger_autonumous_mode()) {
+			push_stars_from_high_fence();
+		}
+
 		int rotateSpeed = 0;
 		if (vexRT[Btn5D] == 1) {
 			rotateSpeed = -48;
@@ -227,5 +271,3 @@ task usercontrol()
 		sendToClawMotor(vexRT[Ch4Xmtr2]);
 	}
 }
-
-
