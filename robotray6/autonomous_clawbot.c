@@ -28,10 +28,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-int clawMotorSpeed = 50;
+int clawMotorSpeed = 65;
 int rotateMotorSpeed = 50;
 int liftMotorSpeed = 80;
-int wheelMotorSpeed = 50;
+int wheelMotorSpeed = 80;
 
 int trigger_autonumous_mode() {
 	if (vexRT[Btn6D] == 1 && vexRT[Btn6U] == 1) {
@@ -52,14 +52,17 @@ int cancel_autonumous_mode() {
 }
 
 void sendToLiftMotor(int speed) {
-		motor[liftMotor1] = speed;
-		motor[liftMotor2] = speed;
-		motor[liftMotor3] = speed;
-		motor[liftMotor4] = speed;
+	if (speed < 0) {
+		speed = speed / 2;
+	}
+	motor[liftMotor1] = speed;
+	motor[liftMotor2] = speed;
+	motor[liftMotor3] = speed;
+	motor[liftMotor4] = speed;
 }
 
 void sendToClawMotor(int speed) {
-	motor[clawLeft] = -speed;
+	motor[clawLeft] = -1 * speed;
 	motor[clawRight] = speed;
 }
 
@@ -71,7 +74,9 @@ void rotate_bot(int speed) {
 }
 
 void drive_bot(int speedVeritical, int speedHorizontal ) {
-	speedHorizontal -= 5;
+	int adjustSpeed = 10;
+	speedHorizontal += adjustSpeed;
+	speedVeritical -= adjustSpeed;
 	motor[leftFront]  = speedVeritical + speedHorizontal;
 	motor[rightBack]  = -1 * (speedVeritical + speedHorizontal);
 	motor[rightFront] = speedHorizontal - speedVeritical;
@@ -167,9 +172,9 @@ long max(long a, long b) {
 }
 
 void push_stars_from_high_fence() {
-	int timeToMoveForward = 4700;
+	int timeToMoveForward = 2500;
 	int timeToOpenClaw = 1500;
-	int timeToLiftArm = 4550;
+	int timeToLiftArm = 1500;
 	int syncCount = 0;
 
 
@@ -203,14 +208,15 @@ void push_stars_from_high_fence() {
 	wait1Msec(2000);
 
 	//move bot back
-	int timeToMoveBackward = timeToMoveForward / 2;
-	int timeToDropArm = timeToLiftArm;
+	int timeToMoveBackward = timeToMoveForward / 2 - 500;
+	int timeToDropArm = timeToLiftArm / 2;
 	maxCount = max(timeToMoveBackward, timeToDropArm);
 	syncCount = 0;
 
 	drive_bot_backward();
+	wait1Msec(500);
 	drop_bot_arm();
-	close_bot_claw();
+	//close_bot_claw();
 
 	while (syncCount <= maxCount) {
 		if (cancel_autonumous_mode()) {
@@ -232,6 +238,9 @@ void push_stars_from_high_fence() {
 		}
 	}
 
+	rotate_bot_clockwise();
+	wait1Msec(1000);
+	stop_bot_movement();
 }
 
 
