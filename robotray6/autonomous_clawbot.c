@@ -73,14 +73,15 @@ void rotate_bot(int speed) {
 	motor[leftBack]   = speed;
 }
 
-void drive_bot(int speedVeritical, int speedHorizontal ) {
-	int adjustSpeed = 10;
+void drive_bot(int speedVeritical, int speedHorizontal, int speedRotation) {
+	float wheelAlignmentAdjustmentRatio = 0.1;
+	int speedAdjustement = floor()
 	speedHorizontal += adjustSpeed;
 	speedVeritical -= adjustSpeed;
-	motor[leftFront]  = speedVeritical + speedHorizontal;
-	motor[rightBack]  = -1 * (speedVeritical + speedHorizontal);
-	motor[rightFront] = speedHorizontal - speedVeritical;
-	motor[leftBack]   = speedVeritical - speedHorizontal;
+	motor[leftFront]  = speedVeritical + speedHorizontal + speedRotation;
+	motor[rightBack]  = -1 * (speedVeritical + speedHorizontal) + speedRotation;
+	motor[rightFront] = speedHorizontal - speedVeritical + speedRotation;
+	motor[leftBack]   = speedVeritical - speedHorizontal + speedRotation;
 }
 
 void open_bot_claw() {
@@ -243,10 +244,13 @@ void push_stars_from_high_fence() {
 	stop_bot_movement();
 }
 
+void doAutonumousMovement() {
+	push_stars_from_high_fence();
+}
 
 task autonomous()
 {
-	push_stars_from_high_fence();
+	doAutonumousMovement();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -260,26 +264,39 @@ task autonomous()
 
 task usercontrol()
 {
+	int liftArmControlThreshold = 10;
+	int clawControlThreshold = 10;
+
 	while(true){
 		if (trigger_autonumous_mode()) {
-			push_stars_from_high_fence();
+			doAutonumousMovement();
 		}
 
-		int rotateSpeed = 0;
+		int rotateDirection = 0;
 		if (vexRT[Btn5D] == 1) {
-			rotateSpeed = -48;
+			rotateDirection = -1;
 		}
 		else if (vexRT[Btn5U] == 1) {
-			rotateSpeed = 48;
+			rotateDirection = 1;
 		}
 
-		motor[leftFront] 	=   vexRT[Ch1] + vexRT[Ch2] + rotateSpeed;
-		motor[rightBack] 	= - vexRT[Ch1] - vexRT[Ch2] + rotateSpeed;
-		motor[rightFront] = - vexRT[Ch2] + vexRT[Ch1] + rotateSpeed;
-		motor[leftBack] 	=   vexRT[Ch2] - vexRT[Ch1] + rotateSpeed;
+		int wheelStraightMovementInput = vexRT[Ch1];
+		int wheelSideMovementInput = vexRT[Ch2];
+		drive_bot(wheelStraightMovementInput, wheelSideMovementInput, rotateDirection * rotateMotorSpeed);
 
-		sendToLiftMotor(vexRT[Ch2Xmtr2]);
+		int liftControlInput = vexRT[Ch2Xmtr2];
+		int clawControlInput = vexRT[Ch4Xmtr2];
+		//if 
+		if (abs(liftControlInput) > liftArmControlThreshold) {
+			sendToLiftMotor(sgn(liftControlInput) * liftMotorSpeed);
+		} else {
+			sendToLiftMotor(0);
+		}
 
-		sendToClawMotor(vexRT[Ch4Xmtr2]);
+		if (abs(clawControlInput) > clawControlThreshold) {
+			sendToClawMotor(sgn(clawControlInput) * clawMotorSpeed);
+		} else {
+			sendToClawMotor(0);
+		}
 	}
 }
