@@ -209,13 +209,30 @@ void push_stars_from_high_fence() {
 	stop_bot_movement();
 }
 
+void reach_cube_from_base() {
+	sendToWheelMotor(80, 80, 20);
+	//sendToClawMotor(20);
+	wait1Msec(1000);
+	stop_bot_movement();
+	//stop_bot_claw();
+}
+
+void grab_cube_and_lift() {
+	close_bot_claw();
+	wait1Msec(1000);
+	stop_bot_claw();
+	lift_bot_arm();
+	wait1Msec(2000);
+}
+
 void pre_auton()
 {
   bStopTasksBetweenModes = true;
 }
 
 void doAutonumousMovement() {
-	push_stars_from_high_fence();
+	//push_stars_from_high_fence();
+	reach_cube_from_base();
 }
 
 task autonomous()
