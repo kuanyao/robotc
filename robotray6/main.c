@@ -21,9 +21,10 @@
 #include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
 
 int CLAW_MOTOR_SPEED 	= 65;
-int ROTATE_MOTOR_SPEED 	= 50;
+int ROTATE_MOTOR_SPEED 	= 40;
 int LIFT_MOTOR_SPEED 	= 80;
 int WHEEL_MOTOR_SPEED 	= 80;
+int PROGRESS_INCREMENT_DURATION = 80;
 
 void sendToLiftMotor(int speed) {
 	if (speed < 0) {
@@ -42,9 +43,9 @@ void sendToClawMotor(int speed) {
 }
 
 void sendToWheelMotor(int speedVeritical, int speedHorizontal, int speedRotation) {
-	float wheelAlignmentAdjustmentRatio = 0.1;
-	speedHorizontal *= (1 + wheelAlignmentAdjustmentRatio);
-	speedVeritical *= (1 - wheelAlignmentAdjustmentRatio);
+	// float wheelAlignmentAdjustmentRatio = 0.1;
+	// speedHorizontal *= (1 + wheelAlignmentAdjustmentRatio);
+	// speedVeritical *= (1 - wheelAlignmentAdjustmentRatio);
 	motor[leftFront]  = speedVeritical + speedHorizontal + speedRotation;
 	motor[rightBack]  = -1 * (speedVeritical + speedHorizontal) + speedRotation;
 	motor[rightFront] = speedHorizontal - speedVeritical + speedRotation;
@@ -57,11 +58,11 @@ void rotate_bot(int speed) {
 }
 
 void open_bot_claw() {
-	sendToClawMotor(CLAW_MOTOR_SPEED);
+	sendToClawMotor(-1 * CLAW_MOTOR_SPEED);
 }
 
 void close_bot_claw() {
-	sendToClawMotor(-1 * CLAW_MOTOR_SPEED);
+	sendToClawMotor(CLAW_MOTOR_SPEED);
 }
 
 void stop_bot_claw() {
@@ -105,7 +106,7 @@ void lift_bot_arm() {
 }
 
 void drop_bot_arm() {
-	sendToLiftMotor(-1 * LIFT_MOTOR_SPEED);
+	sendToLiftMotor(-1 * LIFT_MOTOR_SPEED / 2);
 }
 
 int trigger_autonomous_mode() {
@@ -210,36 +211,35 @@ void push_stars_from_high_fence() {
 }
 
 void reach_cube_from_base() {
-	sendToWheelMotor(80, 80, 20);
-	//sendToClawMotor(20);
-	wait1Msec(1000);
-	stop_bot_movement();
-	//stop_bot_claw();
-}
-
-void grab_cube_from_center() {
+	rotate_bot_clockwise();
 	close_bot_claw();
-	wait1Msec(1000);
+	wait1Msec(500);
+	drive_bot_forward();
+	wait1Msec(1500);
+	stop_bot_movement();
+	wait1Msec(2000);
 	stop_bot_claw();
 }
 
 void drive_bot_to_middle_fench_and_drop() {
 	lift_bot_arm();
-	wait1Msec(2000);
+	wait1Msec(500);
+	rotate_bot_counter_clockwise();
+	wait1Msec(400);
+	stop_bot_movement();
+	wait1Msec(1100);
 	stop_bot_arm();
-
-	sendToWheelMotor(80, 80, -20);
+	drive_bot_towards_right();
+	wait1Msec(500);
+	stop_bot_movement();
+	wait1Msec(500);
+	drive_bot_forward();
 	wait1Msec(1000);
 	stop_bot_movement();
 
 	open_bot_claw();
-	wait1Msec(1000);
+	wait1Msec(300);
 	stop_bot_claw();
-
-	//drive bot back
-	drive_bot_backward();
-	wait1Msec(1000);
-	stop_bot_movement();
 }
 
 void push_stars_from_center_fench() {
@@ -266,8 +266,7 @@ void pre_auton()
 void doAutonumousMovement() {
 	//push_stars_from_high_fence();
 	reach_cube_from_base();
-	// grab_cube_from_center();
-	// drive_bot_to_middle_fench_and_drop();
+	drive_bot_to_middle_fench_and_drop();
 	// push_stars_from_center_fench();
 }
 
@@ -276,16 +275,73 @@ task autonomous()
 	doAutonumousMovement();
 }
 
+void subtle_movement_control() {
+	if (vexRT[Btn8U] == 1 || vexRT[Btn8D] == 1 || vexRT[Btn8L] == 1 || vexRT[Btn8R] == 1) {
+		if (vexRT[Btn8U] == 1) {
+			sendToWheelMotor(WHEEL_MOTOR_SPEED / 2, 0, 0);
+		} else if (vexRT[Btn8D] == 1) {
+			sendToWheelMotor(-1 * WHEEL_MOTOR_SPEED / 2, 0, 0);
+		} else if (vexRT[Btn8L] == 1) {
+			sendToWheelMotor(0, -1 * WHEEL_MOTOR_SPEED / 2, 0);
+		} else if (vexRT[Btn8R] == 1) {
+			sendToWheelMotor(0, WHEEL_MOTOR_SPEED / 2, 0);
+		}
+		wait1Msec(PROGRESS_INCREMENT_DURATION);
+	}
+}
+
+void subtle_rotation_control() {
+	if (vexRT[Btn7L] == 1 || vexRT[Btn7R] == 1) {
+		if (vexRT[Btn7L] == 1) {
+			rotate_bot(-1 * ROTATE_MOTOR_SPEED / 2);
+		} else {
+			rotate_bot(ROTATE_MOTOR_SPEED / 2);
+		}
+		wait1Msec(PROGRESS_INCREMENT_DURATION);
+	}
+}
+
+void subtle_claw_control() {
+	if (vexRT[Btn7LXmtr2] == 1 || vexRT[Btn7RXmtr2] == 1) {
+		if (vexRT[Btn7LXmtr2] == 1) {
+			sendToClawMotor(-1 * CLAW_MOTOR_SPEED / 2);
+		} else {
+			sendToClawMotor(CLAW_MOTOR_SPEED / 2);
+		}
+		wait1Msec(PROGRESS_INCREMENT_DURATION);
+	}
+}
+
+void subtle_arm_control() {
+	if (vexRT[Btn8UXmtr2] == 1 || vexRT[Btn8DXmtr2] == 1) {
+		if (vexRT[Btn8UXmtr2] == 1) {
+			sendToLiftMotor(LIFT_MOTOR_SPEED / 2);
+		} else {
+			sendToLiftMotor(-1 * LIFT_MOTOR_SPEED / 3);
+		}
+		wait1Msec(PROGRESS_INCREMENT_DURATION);
+	}
+}
+
+void subtle_controls() {
+	subtle_arm_control();
+	subtle_claw_control();
+	subtle_rotation_control();
+	subtle_movement_control();
+}
+
 task usercontrol()
 {
-	int liftArmControlThreshold = 10;
+	int liftArmControlThreshold = 15;
 	int clawControlThreshold = 10;
-	int wheelControlThreshold = 5;
+	int wheelControlThreshold = 15;
 
 	while(true){
 		if (trigger_autonomous_mode()) {
 			doAutonumousMovement();
 		}
+
+		subtle_controls();
 
 		int rotateDirection = 0;
 		if (vexRT[Btn5D] == 1) {
@@ -295,18 +351,23 @@ task usercontrol()
 			rotateDirection = 1;
 		}
 
-		int wheelStraightMovementInput = vexRT[Ch1];
-		int wheelSideMovementInput = vexRT[Ch2];
+		int wheelStraightMovementInput = vexRT[Ch2];
+		int wheelSideMovementInput = vexRT[Ch1];
 
 		if (max(abs(wheelStraightMovementInput), abs(wheelSideMovementInput)) > wheelControlThreshold
 			|| rotateDirection != 0) {
 			sendToWheelMotor(wheelStraightMovementInput, wheelSideMovementInput, rotateDirection * ROTATE_MOTOR_SPEED);
+		} else {
+			stop_bot_movement();
 		}
 
 		int liftControlInput = vexRT[Ch2Xmtr2];
 		int clawControlInput = vexRT[Ch4Xmtr2];
 		if (abs(liftControlInput) > liftArmControlThreshold) {
-			sendToLiftMotor(sgn(liftControlInput) * LIFT_MOTOR_SPEED);
+			if (liftControlInput < 0) {
+				liftControlInput /= 2;
+			}
+			sendToLiftMotor(liftControlInput);
 		} else {
 			sendToLiftMotor(0);
 		}
