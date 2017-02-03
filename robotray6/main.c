@@ -217,12 +217,45 @@ void reach_cube_from_base() {
 	//stop_bot_claw();
 }
 
-void grab_cube_and_lift() {
+void grab_cube_from_center() {
 	close_bot_claw();
 	wait1Msec(1000);
 	stop_bot_claw();
+}
+
+void drive_bot_to_middle_fench_and_drop() {
 	lift_bot_arm();
 	wait1Msec(2000);
+	stop_bot_arm();
+
+	sendToWheelMotor(80, 80, -20);
+	wait1Msec(1000);
+	stop_bot_movement();
+
+	open_bot_claw();
+	wait1Msec(1000);
+	stop_bot_claw();
+
+	//drive bot back
+	drive_bot_backward();
+	wait1Msec(1000);
+	stop_bot_movement();
+}
+
+void push_stars_from_center_fench() {
+	open_bot_claw();
+	wait1Msec(1000);
+	stop_bot_claw();
+
+	drive_bot_forward();
+	wait1Msec(1000);
+	stop_bot_movement();
+
+	wait1Msec(500);
+
+	drive_bot_backward();
+	wait1Msec(1000);
+	stop_bot_movement();
 }
 
 void pre_auton()
@@ -233,6 +266,9 @@ void pre_auton()
 void doAutonumousMovement() {
 	//push_stars_from_high_fence();
 	reach_cube_from_base();
+	// grab_cube_from_center();
+	// drive_bot_to_middle_fench_and_drop();
+	// push_stars_from_center_fench();
 }
 
 task autonomous()
