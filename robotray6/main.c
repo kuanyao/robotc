@@ -20,7 +20,7 @@
 
 #include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
 
-int CLAW_MOTOR_SPEED 	= 65;
+int CLAW_MOTOR_SPEED 	= 85;
 int ROTATE_MOTOR_SPEED 	= 40;
 int LIFT_MOTOR_SPEED 	= 80;
 int WHEEL_MOTOR_SPEED 	= 80;
@@ -212,12 +212,13 @@ void push_stars_from_high_fence() {
 
 void reach_cube_from_base() {
 	rotate_bot_clockwise();
-	close_bot_claw();
-	wait1Msec(500);
+	wait1Msec(700);
 	drive_bot_forward();
-	wait1Msec(1500);
+	wait1Msec(600);
+	close_bot_claw();
+	wait1Msec(700);
 	stop_bot_movement();
-	wait1Msec(2000);
+	wait1Msec(1500);
 	stop_bot_claw();
 }
 
@@ -225,7 +226,7 @@ void drive_bot_to_middle_fench_and_drop() {
 	lift_bot_arm();
 	wait1Msec(500);
 	rotate_bot_counter_clockwise();
-	wait1Msec(400);
+	wait1Msec(700);
 	stop_bot_movement();
 	wait1Msec(1100);
 	stop_bot_arm();
@@ -234,7 +235,7 @@ void drive_bot_to_middle_fench_and_drop() {
 	stop_bot_movement();
 	wait1Msec(500);
 	drive_bot_forward();
-	wait1Msec(1000);
+	wait1Msec(1500);
 	stop_bot_movement();
 
 	open_bot_claw();
@@ -243,19 +244,64 @@ void drive_bot_to_middle_fench_and_drop() {
 }
 
 void push_stars_from_center_fench() {
-	open_bot_claw();
-	wait1Msec(1000);
-	stop_bot_claw();
+	drive_bot_backward();
+	wait1Msec(700);
 
+	stop_bot_movement();
+	sendToLiftMotor(-25);
+	wait1Msec(850);
+	stop_bot_arm();
+	wait1Msec(500);
+
+	open_bot_claw();
+	drive_bot_forward();
+	wait1Msec(250);
+	stop_bot_claw();
+	wait1Msec(500);
+	stop_bot_movement();
+	wait1Msec(250);
+}
+
+void turn_back_and_grab_centerback_stars() {
+	
+	//move bot backwards, rotate 180 degrees, drop arms
+	drive_bot_backward();
+	wait1Msec(1000);
+	rotate_bot_clockwise();
+	drop_bot_arm();
+	wait1Msec(600);
+	stop_bot_arm();
+	wait1Msec(400);
+
+	//move bot forward a bit
+	drive_bot_forward();
+	wait1Msec(600);
+	stop_bot_movement();
+
+	//close arms
+	close_bot_claw();
+	wait1Msec(800);
+
+	//lift arms, turn 180 degress
+	lift_bot_arm();
+	rotate_bot_clockwise();
+	wait1Msec(1000);
+	stop_bot_arm();
+	stop_bot_movement();
+	wait1Msec(200);
+
+	//drive bot forward();
 	drive_bot_forward();
 	wait1Msec(1000);
 	stop_bot_movement();
 
+	//open claw
+	open_bot_claw();
 	wait1Msec(500);
 
+	//move bot backwards();
 	drive_bot_backward();
 	wait1Msec(1000);
-	stop_bot_movement();
 }
 
 void pre_auton()
@@ -267,7 +313,8 @@ void doAutonumousMovement() {
 	//push_stars_from_high_fence();
 	reach_cube_from_base();
 	drive_bot_to_middle_fench_and_drop();
-	// push_stars_from_center_fench();
+	push_stars_from_center_fench();
+	turn_back_and_grab_centerback_stars();
 }
 
 task autonomous()
