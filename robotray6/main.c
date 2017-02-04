@@ -212,13 +212,13 @@ void push_stars_from_high_fence() {
 
 void reach_cube_from_base() {
 	rotate_bot_clockwise();
-	wait1Msec(700);
+	wait1Msec(600);
 	drive_bot_forward();
 	wait1Msec(600);
 	close_bot_claw();
 	wait1Msec(700);
 	stop_bot_movement();
-	wait1Msec(1500);
+	wait1Msec(1750);
 	stop_bot_claw();
 }
 
@@ -226,12 +226,15 @@ void drive_bot_to_middle_fench_and_drop() {
 	lift_bot_arm();
 	wait1Msec(500);
 	rotate_bot_counter_clockwise();
-	wait1Msec(700);
+	wait1Msec(600);
 	stop_bot_movement();
 	wait1Msec(1100);
 	stop_bot_arm();
-	drive_bot_towards_right();
-	wait1Msec(500);
+
+	//drive_bot_towards_right();
+	sendToWheelMotor(0, WHEEL_MOTOR_SPEED / 3 * 2, 0);
+	wait1Msec(1100);
+
 	stop_bot_movement();
 	wait1Msec(500);
 	drive_bot_forward();
@@ -248,8 +251,8 @@ void push_stars_from_center_fench() {
 	wait1Msec(700);
 
 	stop_bot_movement();
-	sendToLiftMotor(-25);
-	wait1Msec(850);
+	sendToLiftMotor(-30);
+	wait1Msec(550);
 	stop_bot_arm();
 	wait1Msec(500);
 
@@ -262,8 +265,7 @@ void push_stars_from_center_fench() {
 	wait1Msec(250);
 }
 
-void turn_back_and_grab_centerback_stars() {
-	
+void turn_back_and_rotate() {
 	//move bot backwards, rotate 180 degrees, drop arms
 	drive_bot_backward();
 	wait1Msec(1000);
@@ -271,8 +273,10 @@ void turn_back_and_grab_centerback_stars() {
 	drop_bot_arm();
 	wait1Msec(600);
 	stop_bot_arm();
-	wait1Msec(400);
+	wait1Msec(1400);
+}
 
+void fetch_centerback_stars() {
 	//move bot forward a bit
 	drive_bot_forward();
 	wait1Msec(600);
@@ -314,7 +318,8 @@ void doAutonumousMovement() {
 	reach_cube_from_base();
 	drive_bot_to_middle_fench_and_drop();
 	push_stars_from_center_fench();
-	turn_back_and_grab_centerback_stars();
+	turn_back_and_rotate();
+	//turn_back_and_grab_centerback_stars();
 }
 
 task autonomous()
