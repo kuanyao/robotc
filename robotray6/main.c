@@ -232,11 +232,11 @@ void drive_bot_to_middle_fench_and_drop() {
 	stop_bot_arm();
 
 	//drive_bot_towards_right();
-	sendToWheelMotor(0, WHEEL_MOTOR_SPEED / 3 * 2, 0);
-	wait1Msec(1100);
+	sendToWheelMotor(0, WHEEL_MOTOR_SPEED / 4 * 3, 0);
+	wait1Msec(500);
 
 	stop_bot_movement();
-	wait1Msec(500);
+	wait1Msec(200);
 	drive_bot_forward();
 	wait1Msec(1500);
 	stop_bot_movement();
@@ -274,6 +274,7 @@ void turn_back_and_rotate() {
 	wait1Msec(600);
 	stop_bot_arm();
 	wait1Msec(1400);
+	stop_bot_movement();
 }
 
 void fetch_centerback_stars() {
@@ -294,7 +295,7 @@ void fetch_centerback_stars() {
 	stop_bot_movement();
 	wait1Msec(200);
 
-	//drive bot forward();
+  //drive bot forward();
 	drive_bot_forward();
 	wait1Msec(1000);
 	stop_bot_movement();
@@ -314,6 +315,8 @@ void pre_auton()
 }
 
 void doAutonumousMovement() {
+
+
 	//push_stars_from_high_fence();
 	reach_cube_from_base();
 	drive_bot_to_middle_fench_and_drop();
